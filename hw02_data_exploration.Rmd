@@ -1,0 +1,102 @@
+---
+title: "STAT545_hw02_exploration"
+output: github_document
+---
+
+```{r}
+library(gapminder)
+library(tidyverse)
+```
+# Smell test the data
+
+What is the gapminder object?
+```{r}
+typeof(gapminder)
+```
+
+What is its class?
+
+```{r}
+class(gapminder)
+```
+
+How many variables/columns?
+
+```{r}
+ncol(gapminder)
+```
+
+How many rows/observations?
+
+```{r}
+nrow(gapminder)
+```
+
+Can you get these facts about “extent” or “size” in more than one way? Can you imagine different functions being useful in different contexts?
+
+```{r}
+dim(gapminder)
+```
+
+nrow and ncol functions could be useful if creating loops that require the number of rows or columns. dim function could be useful for matrix calculations
+
+What data type is each variable?
+
+```{r}
+sapply(gapminder, class)
+```
+
+# Explore individual variables
+
+What are possible values (or range, whichever is appropriate) of each variable?
+
+```{r}
+range(gapminder$year)
+range(gapminder$lifeExp)
+table(gapminder$continent)
+```
+
+What values are typical? What’s the spread? What’s the distribution? Etc., tailored to the variable at hand.
+
+```{r}
+summary(gapminder$year)
+summary(gapminder$lifeExp)
+summary(gapminder$continent)
+```
+
+
+Feel free to use summary stats, tables, figures. We’re NOT expecting high production value (yet).
+
+# Explore various plot types
+
+Make a few plots, probably of the same variable you chose to characterize numerically. You can use the plot types we went over in class (cm006) to get an idea of what you’d like to make. Try to explore more than one plot type. Just as an example of what I mean:
+
+A scatterplot of two quantitative variables.
+
+```{r}
+filter(gapminder, country == "Afghanistan" | country == "Canada") %>% 
+ggplot(aes(year, lifeExp)) +
+  geom_point(colour = "red", size = 3)
+```
+
+
+A plot of one quantitative variable. Maybe a histogram or densityplot or frequency polygon.
+
+```{r}
+filter(gapminder, continent == "Africa" & year == 2002) %>% 
+  ggplot(aes(gdpPercap)) +
+  geom_histogram(bins = 30, colour = "black", fill = "blue")
+```
+
+
+
+A plot of one quantitative variable and one categorical. Maybe boxplots for several continents or countries.
+
+
+```{r}
+
+filter(gapminder, country == "United States" | country == "China" | country == "India") %>% 
+  ggplot(aes(group = country, year, gdpPercap)) +
+  geom_violin()
+
+```
