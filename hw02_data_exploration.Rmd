@@ -52,18 +52,30 @@ What are possible values (or range, whichever is appropriate) of each variable?
 
 ```{r}
 range(gapminder$year)
+```
+
+```{r}
 range(gapminder$lifeExp)
+```
+
+```{r}
 table(gapminder$continent)
 ```
+
 
 What values are typical? What’s the spread? What’s the distribution? Etc., tailored to the variable at hand.
 
 ```{r}
 summary(gapminder$year)
-summary(gapminder$lifeExp)
-summary(gapminder$continent)
 ```
 
+```{r}
+summary(gapminder$lifeExp)
+```
+
+```{r}
+summary(gapminder$continent)
+```
 
 Feel free to use summary stats, tables, figures. We’re NOT expecting high production value (yet).
 
@@ -75,17 +87,20 @@ A scatterplot of two quantitative variables.
 
 ```{r}
 filter(gapminder, country == "Afghanistan" | country == "Canada") %>% 
-ggplot(aes(year, lifeExp)) +
-  geom_point(colour = "red", size = 3)
+ggplot(aes(year,lifeExp)) +
+  geom_point(aes(colour = country), size = 3, shape = 15) +
+  geom_smooth(method = "lm", se = FALSE, aes(colour = country)) +
+  theme_classic()
 ```
 
 
 A plot of one quantitative variable. Maybe a histogram or densityplot or frequency polygon.
 
 ```{r}
-filter(gapminder, continent == "Africa" & year == 2002) %>% 
+filter(gapminder, continent == "Africa" & year == 2007) %>% 
   ggplot(aes(gdpPercap)) +
-  geom_histogram(bins = 30, colour = "black", fill = "blue")
+  geom_histogram(bins = 50, colour = "black", fill = "blue", alpha = .5) +
+  theme_classic()
 ```
 
 
@@ -95,8 +110,36 @@ A plot of one quantitative variable and one categorical. Maybe boxplots for seve
 
 ```{r}
 
-filter(gapminder, country == "United States" | country == "China" | country == "India") %>% 
-  ggplot(aes(group = country, year, gdpPercap)) +
-  geom_violin()
+filter(gapminder, continent == "Americas") %>% 
+  ggplot(aes(country, gdpPercap)) +
+  geom_boxplot() +
+  theme(axis.text.x  = element_text(angle=90, vjust=1, size=7))
 
 ```
+
+
+# But I want to do more\!
+
+#An analyst intended to filter *gapminder* data into the entries for the two countries, Afghanistan and Rwanda, by using the following code chunk:
+
+```{r}
+filter(gapminder, country == c("Rwanda", "Afghanistan"))
+```
+
+#By using the c() function, R combined the entries into a vector of the same size as one country's entries. In this case, the function seems to have split them along the year columnm, XXX2 dates from Rwanda and XXX7 dates from Afghanistan, so half of the entries being from each.
+
+#One way to achieve the intended result would have been by filtering for Rwanda entries and filtering for Afghanistan entries.
+
+```{r}
+filter(gapminder, country == "Rwanda" | country == "Afghanistan")
+```
+
+#Here are some additional *dplyr* functions and use of *knitr* to make a simple table.
+
+```{r}
+filter(gapminder, year == 2007) %>% 
+  arrange(desc(gdpPercap)) %>% 
+  select(country, lifeExp, pop, gdpPercap) %>% 
+  knitr::kable(digits = 0,caption = "Table 1: Countries ranked by GDP per capita [2007].")
+```
+
