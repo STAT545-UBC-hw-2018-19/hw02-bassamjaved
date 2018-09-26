@@ -7,51 +7,57 @@ output: github_document
 library(gapminder)
 library(tidyverse)
 ```
-# Smell test the data
+# STAT 545 HW02 Data Exploration
 
-What is the gapminder object?
+## Smell test the data
+
+### What is the gapminder object?
 ```{r}
-typeof(gapminder)
+typeof(gapminder) #returns how R uses object internally
 ```
 
-What is its class?
+### What is its class?
 
 ```{r}
-class(gapminder)
+class(gapminder) #returns class of object i.e. how data is stored
 ```
 
-How many variables/columns?
+### How many variables/columns?
 
 ```{r}
-ncol(gapminder)
+ncol(gapminder) #counts number of columns
 ```
 
-How many rows/observations?
+### How many rows/observations?
 
 ```{r}
-nrow(gapminder)
+nrow(gapminder) #counts number of rows
 ```
 
-Can you get these facts about “extent” or “size” in more than one way? Can you imagine different functions being useful in different contexts?
+### Can you get these facts about “extent” or “size” in more than one way? Can you imagine different functions being useful in different contexts?
 
 ```{r}
-dim(gapminder)
+dim(gapminder) #counts number of rows then columns i.e. dimensions of a 2D matrix
 ```
 
-nrow and ncol functions could be useful if creating loops that require the number of rows or columns. dim function could be useful for matrix calculations
+_nrow_ and _ncol_ functions could be useful for creating loops that require the number of rows or columns. _dim_ function could be useful for matrix calculations.
 
-What data type is each variable?
+
+### What data type is each variable?
 
 ```{r}
-sapply(gapminder, class)
+sapply(gapminder, class) #returns data types of each variable in the object
 ```
 
-# Explore individual variables
 
-What are possible values (or range, whichever is appropriate) of each variable?
+## Explore individual variables
+
+### What are possible values (or range, whichever is appropriate) of each variable?
+
+Let's explore two quantitative variables, *year* \(_integer_\) and *lifeExp* \(_numeric_\), and one categorical variable, *continent* \(_factor_\)
 
 ```{r}
-range(gapminder$year)
+range(gapminder$year) #returns minimum and maximum values of variable in the object
 ```
 
 ```{r}
@@ -59,14 +65,14 @@ range(gapminder$lifeExp)
 ```
 
 ```{r}
-table(gapminder$continent)
+table(gapminder$continent) #continent is a categorical variable, so table() will list possible values 
 ```
 
 
 What values are typical? What’s the spread? What’s the distribution? Etc., tailored to the variable at hand.
 
 ```{r}
-summary(gapminder$year)
+summary(gapminder$year) #returns statistical summary
 ```
 
 ```{r}
@@ -74,43 +80,61 @@ summary(gapminder$lifeExp)
 ```
 
 ```{r}
-summary(gapminder$continent)
+summary(gapminder$continent) #for cateogrical variable, returns output similar to table()
 ```
 
-Feel free to use summary stats, tables, figures. We’re NOT expecting high production value (yet).
 
-# Explore various plot types
+## Explore various plot types
 
-Make a few plots, probably of the same variable you chose to characterize numerically. You can use the plot types we went over in class (cm006) to get an idea of what you’d like to make. Try to explore more than one plot type. Just as an example of what I mean:
+### A scatterplot of two quantitative variables.
 
-A scatterplot of two quantitative variables.
+I will compare the life expectancy over time of Afghanistan and Canada:
 
 ```{r}
 filter(gapminder, country == "Afghanistan" | country == "Canada") %>% 
 ggplot(aes(year,lifeExp)) +
-  geom_point(aes(colour = country), size = 3, shape = 15) +
-  geom_smooth(method = "lm", se = FALSE, aes(colour = country)) +
-  theme_classic()
+  geom_point(aes(colour = country), size = 3, shape = 15) + #colour each country distinctly, and give all points custom size and shape
+  geom_smooth(method = "lm", se = FALSE, aes(colour = country)) + #linear regression without default confidence interval shading
+  theme_classic() #change the look of the plot
 ```
 
+Note that life expectancy in both countries increased over time, but Canada has a signficantly higher life expectancy than Afghanistan.
 
-A plot of one quantitative variable. Maybe a histogram or densityplot or frequency polygon.
+
+## A plot of one quantitative variable.
+
+I will find the spread of GDP per capita in Africa in 1952 and 2007 (chronologically, the earliest and most recent data contained in *gapminder*)
 
 ```{r}
-filter(gapminder, continent == "Africa" & year == 2007) %>% 
+filter(gapminder, continent == "Africa" & (year == 2007 | year == 1952)) %>% 
   ggplot(aes(gdpPercap)) +
-  geom_histogram(bins = 50, colour = "black", fill = "blue", alpha = .5) +
+  geom_histogram(bins = 50, colour = "black", fill = "blue", alpha = .5) + #distribute over custom bin number, customize colour and fill, and give some transparency for visual appeal
+  facet_grid(~year) + #create multiple plots by year
   theme_classic()
 ```
 
+Here we see that in 1952, all of of Africa had GDP per capita lower than \$5,000. 55 years later, the majority of Africa still has GDP per capita lower than \$5,000, but now with significant portions between \$5,000-10,000 and some above \$10,000.
 
 
-A plot of one quantitative variable and one categorical. Maybe boxplots for several continents or countries.
+## A plot of one quantitative variable and one categorical.
 
+I will plot the 5-number statistical summary of GDP per capita of countries in the Americas.
 
 ```{r}
 
 filter(gapminder, continent == "Americas") %>% 
+  ggplot(aes(country, gdpPercap)) +
+  geom_boxplot() +
+  theme(axis.text.x  = element_text(angle=90, vjust=1, size=7)) #customize x-axis labelling for readability
+
+```
+
+Not suprisingly, US and Canada have the highest GDP per capita. Let's take a look at the above plot without US and Canada so we can explore the rest of the Americas with better resolution.
+
+```{r}
+
+filter(gapminder, continent == "Americas" & country != "Canada" & country != "United States") %>%
+  # exclude Canada and United States with the filter
   ggplot(aes(country, gdpPercap)) +
   geom_boxplot() +
   theme(axis.text.x  = element_text(angle=90, vjust=1, size=7))
@@ -118,23 +142,23 @@ filter(gapminder, continent == "Americas") %>%
 ```
 
 
-# But I want to do more\!
+## But I want to do more\!
 
-#An analyst intended to filter *gapminder* data into the entries for the two countries, Afghanistan and Rwanda, by using the following code chunk:
+### An analyst intended to filter *gapminder* data into the entries for the two countries, Afghanistan and Rwanda, by using the following code chunk:
 
 ```{r}
 filter(gapminder, country == c("Rwanda", "Afghanistan"))
 ```
 
-#By using the c() function, R combined the entries into a vector of the same size as one country's entries. In this case, the function seems to have split them along the year columnm, XXX2 dates from Rwanda and XXX7 dates from Afghanistan, so half of the entries being from each.
+By using the c() function, R combined the entries into a vector of the same size as one country's entries. In this case, the function seems to have split them along the year column, XXX2 dates from Rwanda and XXX7 dates from Afghanistan, so half of the entries being from each.
 
-#One way to achieve the intended result would have been by filtering for Rwanda entries and filtering for Afghanistan entries.
+One way to achieve the intended result would have been by filtering for Rwanda entries and filtering for Afghanistan entries.
 
 ```{r}
 filter(gapminder, country == "Rwanda" | country == "Afghanistan")
 ```
 
-#Here are some additional *dplyr* functions and use of *knitr* to make a simple table.
+## Here are some additional *dplyr* functions and use of *knitr* to make a simple table.
 
 ```{r}
 filter(gapminder, year == 2007) %>% 
@@ -143,3 +167,4 @@ filter(gapminder, year == 2007) %>%
   knitr::kable(digits = 0,caption = "Table 1: Countries ranked by GDP per capita [2007].")
 ```
 
+#### End of file
